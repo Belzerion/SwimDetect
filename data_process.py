@@ -18,17 +18,40 @@ class Entree:
         self.nageur_2 = nageur_2
         self.fichier_1 = fichier_1
         self.fichier_2 = fichier_2
-    def load_image(self, fichier):
-        full_image = Image.open(self.fichier)
+    def load_patch(self, nageur, fichier):
+        full_image = Image.open(fichier.replace('json', 'png'))
         arr = np.array(full_image)
+        rectangle = get_rectangle_from_points(nageur)
+        print(rectangle)
+
+        rectangle[0] -= 10
+        rectangle[1] -= 10
+        rectangle[2] += 10
+        rectangle[3] += 10
+
+        patch = arr[rectangle[1]:rectangle[3], rectangle[0]:rectangle[2]]
+        img = Image.fromarray(patch)
+        img = np.array(img.resize((cfg.width, cfg.height)))
+        if nageur[0][0] < nageur[1][0]:
+            return np.fliplr(img)
+        
+        return img
+
     def x(self):
-        image_1 = self.load_image(self.fichier_1)
-        image_2 = self.load_image(self.fichier_2)
-        pass
+        arr = np.zeros((2, cfg.height, cfg.width, 3))
+        arr[0] = self.load_patch(self.nageur_1, self.fichier_1)
+        arr[1] = self.load_patch(self.nageur_2, self.fichier_2)
+        return arr
+    
     def y(self):
-        arr = np.zeros((cfg.width, cfg.height, 4))
+        arr = np.zeros((cfg.target_height, cfg.target_width, 4))
         for i, point in enumerate(self.nageur_2):
-            arr[:, :, i][disk(point, radius=10)] = 1
+            arr[point[0], point[1], i] = 1
+        """"
+        for i in range(4):
+            nageur[i][0] -= rectangle[0]
+            nageur[i][1] -= rectangle[1]
+        """
         return arr
     def __str__(self) -> str:
         return self.fichier_1 + ' ' + self.fichier_2
@@ -90,21 +113,31 @@ def euclidean_distance(points, points_bis):
     dist = math.pow(points[0] - points_bis[0],2) +  math.pow(points[1] - points_bis[1],2)
     return dist
 
+def get_rectangle_from_points(points):
+    #x1, y1, x2, y2
+    rectangle = [points[0][0], points[0][1], points[0][0], points[0][1]]
+    for point in points[1:]:
+        if point[0] < rectangle[0]:
+            rectangle[0] = point[0]
+        if point[0] > rectangle[2]:
+            rectangle[2] = point[0]
+        if point[1] < rectangle[1]:
+            rectangle[1] = point[1]
+        if point[1] > rectangle[3]:
+            rectangle[3] = point[1]
+    rectangle[0] = int(rectangle[0])
+    rectangle[1] = int(rectangle[1])
+    rectangle[2] = int(rectangle[2])
+    rectangle[3] = int(rectangle[3])
+    return rectangle
+
+
+
 def check_max_size_box(entrees):
     largeurs = []
     hauteurs = []
     for entree in entrees:
-        #x1, y1, x2, y2
-        rectangle = [entree.nageur_1[0][0], entree.nageur_1[0][1], entree.nageur_1[0][0], entree.nageur_1[0][1]]
-        for point in entree.nageur_1[1:]:
-            if point[0] < rectangle[0]:
-                rectangle[0] = point[0]
-            if point[0] > rectangle[2]:
-                rectangle[2] = point[0]
-            if point[1] < rectangle[1]:
-                rectangle[1] = point[1]
-            if point[1] > rectangle[3]:
-                rectangle[3] = point[1]
+        rectangle = get_rectangle_from_points(entree.nageur_1)
         largeurs.append(rectangle[2] - rectangle[0])
         hauteurs.append(rectangle[3] - rectangle[1])
     largeurs = sorted(largeurs)
@@ -121,12 +154,17 @@ def check_max_size_box(entrees):
     print(f'max : {max(hauteurs)}')
     plt.plot(largeurs, c  = 'b')
     plt.plot(hauteurs, c = 'g')
+    plt.title('dispersion des hauteurs (courbe verte), largeurs (courbe bleue)')
     plt.show()
         
 
 if __name__ == '__main__':
     inputs = load_data()
-    check_max_size_box(inputs)
+    #check_max_size_box(inputs)
+
+    for i in range(10):
+        image  = inputs[i].load_patch(inputs[i].nageur_1, inputs[i].fichier_1)
+        Image.fromarray(image).show()
     
     
 
