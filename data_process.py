@@ -22,7 +22,6 @@ class Entree:
         full_image = Image.open(fichier.replace('json', 'png'))
         arr = np.array(full_image)
         rectangle = get_rectangle_from_points(nageur)
-        print(rectangle)
 
         rectangle[0] -= 10
         rectangle[1] -= 10
@@ -30,8 +29,14 @@ class Entree:
         rectangle[3] += 10
 
         patch = arr[rectangle[1]:rectangle[3], rectangle[0]:rectangle[2]]
+
+        for point in nageur:
+            patch[int(point[1] - rectangle[1] - 2):int(point[1] - rectangle[1] + 2), int(point[0] - rectangle[0] - 2):int(point[0] - rectangle[0] + 2)] = [1, 1, 1]
+
         img = Image.fromarray(patch)
         img = np.array(img.resize((cfg.width, cfg.height)))
+
+
         if nageur[0][0] < nageur[1][0]:
             return np.fliplr(img)
         
@@ -45,13 +50,22 @@ class Entree:
     
     def y(self):
         arr = np.zeros((cfg.target_height, cfg.target_width, 4))
-        for i, point in enumerate(self.nageur_2):
-            arr[point[0], point[1], i] = 1
-        """"
-        for i in range(4):
-            nageur[i][0] -= rectangle[0]
-            nageur[i][1] -= rectangle[1]
-        """
+        nageur = self.nageur_2
+        #si la tete est a gauche, flip toutes les coordonnees x
+        if self.nageur_2[0][0] < self.nageur_2[1][0]:
+            for i, point in enumerate(nageur):
+                nageur[i][0] = cfg.full_image_width - point[0]
+        rectangle = get_rectangle_from_points(self.nageur_2)
+        for i, point in enumerate(nageur):
+            x = int((point[0] - rectangle[0] + 10) / (rectangle[2] - rectangle[0] + 20) * cfg.target_width) - 1
+            y = int((point[1] - rectangle[1] + 10) / (rectangle[3] - rectangle[1] + 20) * cfg.target_height) - 1
+            
+            x = 0 if x < 0 else x
+            y = 0 if y < 0 else y
+            x = cfg.target_width - 1 if x >= cfg.target_width else x
+            y = cfg.target_height - 1 if y >= cfg.target_height else y
+            
+            arr[y, x, 0] = 1
         return arr
     def __str__(self) -> str:
         return self.fichier_1 + ' ' + self.fichier_2
@@ -163,8 +177,12 @@ if __name__ == '__main__':
     #check_max_size_box(inputs)
 
     for i in range(10):
-        image  = inputs[i].load_patch(inputs[i].nageur_1, inputs[i].fichier_1)
+        image  = inputs[i].load_patch(inputs[i].nageur_2, inputs[i].fichier_2)
         Image.fromarray(image).show()
+        #for j in range(4):
+        image = inputs[i].y()[:,:,0]
+        plt.imshow(image)
+        plt.show()
     
     
 

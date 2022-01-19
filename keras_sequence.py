@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow.keras as keras
 
 class KerasSequence(keras.utils.Sequence):
-    def __init__(self, entries:list, batch_size:int):
+    def __init__(self, entries:list, batch_size=16):
         self.entries = entries
         self.batch_size = batch_size
     
