@@ -16,9 +16,9 @@ def kernel(x):
 def create_model(shape:tuple):
     inputs = keras.layers.Input(shape=shape)
 
-    conv_1 = Conv2D(64, kernel(3), kernel(1), activation="tanh")
-    conv_2 = Conv2D(96, kernel(3), kernel(1), activation="tanh")
-    conv_3 = Conv2D(128, kernel(3), kernel(1), activation="tanh")
+    conv_1 = Conv2D(64, kernel(3), kernel(1), activation=LeakyReLU())
+    conv_2 = Conv2D(96, kernel(3), kernel(1), activation=LeakyReLU())
+    conv_3 = Conv2D(128, kernel(3), kernel(1), activation=LeakyReLU())
 
     x = conv_1(inputs[:, 0])
     x = conv_2(x)
@@ -35,10 +35,10 @@ def create_model(shape:tuple):
 
     x = Concatenate(axis=1)([x, y])
     
-    x = ConvLSTM2D(64, kernel(3), kernel(1), return_sequences=True)(x)
-    x = ConvLSTM2D(64, kernel(3), kernel(1), return_sequences=True)(x)
-    x = ConvLSTM2D(64, kernel(3), kernel(1), return_sequences=False)(x)
-    x = Dense(32, activation="tanh")(x)
+    x = ConvLSTM2D(64, kernel(3), kernel(1), activation=LeakyReLU(), return_sequences=True)(x)
+    x = ConvLSTM2D(64, kernel(3), kernel(1), activation=LeakyReLU(), return_sequences=True)(x)
+    x = ConvLSTM2D(64, kernel(3), kernel(1), activation=LeakyReLU(), return_sequences=False)(x)
+    x = Dense(32, activation=LeakyReLU())(x)
     x = Dense(4, activation="sigmoid")(x)
     return keras.models.Model(inputs, x)
 
@@ -76,12 +76,12 @@ if __name__ == '__main__':
         x = e.x()
         y = e.y()
         pred = modele(np.array([x]))
+        plt.imshow(x[0])
+        plt.show()
         plt.imshow(x[1])
         plt.show()
         plot_y(y)
         plot_y(pred[0])
-
         
-
     breakpoint()
 
