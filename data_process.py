@@ -7,6 +7,7 @@ import re
 import math
 from PIL import Image
 import matplotlib.pyplot as plt
+import copy
 
 from skimage.draw import disk
 
@@ -48,12 +49,12 @@ class Entree:
     
     def y(self):
         arr = np.zeros((cfg.target_height, cfg.target_width, 4))
-        nageur = self.nageur_2
+        nageur = copy.deepcopy(self.nageur_2)
         #si la tete est a gauche, flip toutes les coordonnees x
-        if self.nageur_2[0][0] < self.nageur_2[1][0]:
+        if nageur[0][0] < nageur[1][0]:
             for i, point in enumerate(nageur):
                 nageur[i][0] = cfg.full_image_width - point[0]
-        rectangle = get_rectangle_from_points(self.nageur_2)
+        rectangle = get_rectangle_from_points(nageur)
         for i, point in enumerate(nageur[:4]):#certaines etiquettes ont 5 points...
             x = int((point[0] - rectangle[0] + 10) / (rectangle[2] - rectangle[0] + 20) * cfg.target_width) - 1
             y = int((point[1] - rectangle[1] + 10) / (rectangle[3] - rectangle[1] + 20) * cfg.target_height) - 1

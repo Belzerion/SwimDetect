@@ -55,10 +55,11 @@ if __name__ == '__main__':
 
     modele.save('modele.h5')
     for e in test:
+        print(e.fichier_2)
         x = e.x()
         y = e.y()
         pred = modele(np.array([x]))
-        plt.imshow(x[0])
+        plt.imshow(x[1])
         plt.show()
         plot_y(y)
         plot_y(pred[0])
