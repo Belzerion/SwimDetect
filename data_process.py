@@ -63,7 +63,7 @@ class Entree:
             x = cfg.target_width - 1 if x >= cfg.target_width else x
             y = cfg.target_height - 1 if y >= cfg.target_height else y
             
-            arr[y, x, 0] = 1
+            arr[y, x, i] = 1
         return arr
     def __str__(self) -> str:
         return self.fichier_1 + ' ' + self.fichier_2
