@@ -3,6 +3,8 @@ import tensorflow.keras as keras
 from tensorflow.keras.layers import Conv2D, MaxPool2D, Dense, LeakyReLU, ConvLSTM2D
 import random
 
+import numpy as np
+
 import config as cfg
 import data_process
 from keras_sequence import KerasSequence
@@ -31,7 +33,15 @@ if __name__ == '__main__':
     random.shuffle(entrees)
     train = KerasSequence(entrees[:int(len(entrees)*0.8)])
     validation = KerasSequence(entrees[int(len(entrees)*0.8):int(len(entrees)*0.98)])
-    test = KerasSequence(entrees[int(len(entrees)*0.98):])
+    test = entrees[int(len(entrees)*0.98):]
+    breakpoint()
     modele.fit(train, validation_data=validation, epochs=40, callbacks=[es])
+
+    breakpoint()
+    modele.save('modele.h5')
+    for e in test:
+        x = e.x()
+        y = e.y()
+        pred = modele(np.array([x]))
     breakpoint()
 

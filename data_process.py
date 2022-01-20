@@ -30,12 +30,10 @@ class Entree:
 
         patch = arr[rectangle[1]:rectangle[3], rectangle[0]:rectangle[2]]
 
-        for point in nageur:
-            patch[int(point[1] - rectangle[1] - 2):int(point[1] - rectangle[1] + 2), int(point[0] - rectangle[0] - 2):int(point[0] - rectangle[0] + 2)] = [1, 1, 1]
-
         img = Image.fromarray(patch)
         img = np.array(img.resize((cfg.width, cfg.height)))
 
+        img = img / 255.0
 
         if nageur[0][0] < nageur[1][0]:
             return np.fliplr(img)
