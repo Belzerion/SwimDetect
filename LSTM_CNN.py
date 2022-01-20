@@ -1,6 +1,6 @@
 import tensorflow as tf
 import tensorflow.keras as keras
-from tensorflow.keras.layers import Conv2D, MaxPool2D, Dense, LeakyReLU, ConvLSTM2D
+from tensorflow.keras.layers import Conv2D, MaxPool2D, Dense, LeakyReLU, ConvLSTM2D, Concatenate, Reshape
 import random
 
 import numpy as np
@@ -15,12 +15,29 @@ def kernel(x):
 
 def create_model(shape:tuple):
     inputs = keras.layers.Input(shape=shape)
-    x = ConvLSTM2D(48, kernel(5), kernel(2), return_sequences=True)(inputs)
-    #x = ConvLSTM2D(48, kernel(3), kernel(1), return_sequences=True)(x)
-    x = ConvLSTM2D(48, kernel(3), kernel(1), return_sequences=False)(x)
+
+    conv_1 = Conv2D(64, kernel(3), kernel(1), activation="tanh")
+    conv_2 = Conv2D(96, kernel(3), kernel(1), activation="tanh")
+    conv_3 = Conv2D(128, kernel(3), kernel(1), activation="tanh")
+
+    x = conv_1(inputs[:, 0])
+    x = conv_2(x)
+    x = conv_3(x)
     x = MaxPool2D()(x)
-    x = Conv2D(48, kernel(3), kernel(1), activation="tanh")(x)
-    #x = Conv2D(48, kernel(3), kernel(1), activation="tanh")(x)
+
+    y = conv_1(inputs[:, 1])
+    y = conv_2(y)
+    y = conv_3(y)
+    y = MaxPool2D()(y)
+
+    x = Reshape((1, x.shape[1], x.shape[2], x.shape[3]))(x)
+    y = Reshape((1, y.shape[1], y.shape[2], y.shape[3]))(y)
+
+    x = Concatenate(axis=1)([x, y])
+    
+    x = ConvLSTM2D(64, kernel(3), kernel(1), return_sequences=True)(x)
+    x = ConvLSTM2D(64, kernel(3), kernel(1), return_sequences=True)(x)
+    x = ConvLSTM2D(64, kernel(3), kernel(1), return_sequences=False)(x)
     x = Dense(32, activation="tanh")(x)
     x = Dense(4, activation="sigmoid")(x)
     return keras.models.Model(inputs, x)
