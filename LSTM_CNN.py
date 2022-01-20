@@ -15,11 +15,12 @@ def kernel(x):
 
 def create_model(shape:tuple):
     inputs = keras.layers.Input(shape=shape)
-    x = ConvLSTM2D(48, kernel(5), kernel(2))(inputs)
-    x = Conv2D(48, kernel(3), kernel(1))(x)
-    #x = Conv2D(48, kernel(3), kernel(1))(x)
-    #x = ConvLSTM2D(48, kernel(3), kernel(1))(x)
+    x = ConvLSTM2D(48, kernel(5), kernel(2), return_sequences=True)(inputs)
+    #x = ConvLSTM2D(48, kernel(3), kernel(1), return_sequences=True)(x)
+    x = ConvLSTM2D(48, kernel(3), kernel(1), return_sequences=False)(x)
     x = MaxPool2D()(x)
+    x = Conv2D(48, kernel(3), kernel(1), activation="tanh")(x)
+    #x = Conv2D(48, kernel(3), kernel(1), activation="tanh")(x)
     x = Dense(32, activation="tanh")(x)
     x = Dense(4, activation="sigmoid")(x)
     return keras.models.Model(inputs, x)
@@ -49,11 +50,10 @@ if __name__ == '__main__':
     train = KerasSequence(entrees[:int(len(entrees)*0.8)])
     validation = KerasSequence(entrees[int(len(entrees)*0.8):int(len(entrees)*0.98)])
     test = entrees[int(len(entrees)*0.98):]
-    #modele.fit(train, validation_data=validation, epochs=40, callbacks=[es])
-    modele = keras.models.load_model('modele.h5')
+    modele.fit(train, validation_data=validation, epochs=40, callbacks=[es])
+    #modele = keras.models.load_model('modele.h5')
 
-    #breakpoint()
-    #modele.save('modele.h5')
+    modele.save('modele.h5')
     for e in test:
         x = e.x()
         y = e.y()

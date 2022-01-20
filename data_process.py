@@ -54,7 +54,7 @@ class Entree:
             for i, point in enumerate(nageur):
                 nageur[i][0] = cfg.full_image_width - point[0]
         rectangle = get_rectangle_from_points(self.nageur_2)
-        for i, point in enumerate(nageur):
+        for i, point in enumerate(nageur[:4]):#certaines etiquettes ont 5 points...
             x = int((point[0] - rectangle[0] + 10) / (rectangle[2] - rectangle[0] + 20) * cfg.target_width) - 1
             y = int((point[1] - rectangle[1] + 10) / (rectangle[3] - rectangle[1] + 20) * cfg.target_height) - 1
             
@@ -62,7 +62,6 @@ class Entree:
             y = 0 if y < 0 else y
             x = cfg.target_width - 1 if x >= cfg.target_width else x
             y = cfg.target_height - 1 if y >= cfg.target_height else y
-            
             arr[y, x, i] = 1
         return arr
     def __str__(self) -> str:
